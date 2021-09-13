@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package bone_generator;
+
+service BoneGenerator {
+  rpc execute(Members) returns (Members);
+}
+
+message Vertex {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+message Member {
+  string name = 1;
+  repeated Vertex vertices = 2;
+}
+
+message Members {
+  repeated Member members = 1;
+}

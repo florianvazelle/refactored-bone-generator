@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "frontend"
+version = "0.1.0"
+description = ""
+authors = ["florianvazelle <ponythugflorian@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+"fake-bpy-module-2.91" = "^20210701"
+grpclib = "^0.4.2"
+
+[tool.poetry.dev-dependencies]
+black = "^21.8b0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
