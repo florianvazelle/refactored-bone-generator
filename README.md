@@ -1,7 +1,14 @@
 # refactored-bone-generator
 
+Generate python proto models, run :
+```shell
+python -m grpc_tools.protoc -I . --python_betterproto_out=frontend/src/proto proto/service.proto
+```
+
+To develop the blender addon, create a symbolic link in the blender addons folder :
 ```bash
 ln -s $(pwd)/frontend/src/ ~/.config/blender/2.91/scripts/addons/bone-generator
+mklink /D "%USERPROFILE%\AppData\Roaming\Blender Foundation\Blender\2.91\scripts\addons\bone-generator" "frontend\src"
 ```
 
 I install blender 2.91 with snap :

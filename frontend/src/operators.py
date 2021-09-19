@@ -241,85 +241,87 @@ class ComputeBonesGeneration(BaseOperator):
         # The operator class defines the front-end to a function. Its core
         # logic will likely resides in a separate module (called 'backend' here)
         # as a regular python function.
-        # principal_components = backend.compute_bones_generation(context.active_object, utils.JSONLoader.to_serializable(context.scene))
+
+        members = asyncio.run(
+            client.RpcHandler.rpc_async_req(
+                utils.ProtoSerializer.blender_to_proto(context.scene)
+            )
+        )
         
-        def callback(future: asyncio.Future):
-                principal_components = future.result()
+        principal_components = {x.name: (x.vertices[0], x.vertices[1]) for x in members}
 
-                # We can report messages to the user, doc at:
-                # https://docs.blender.org/api/current/bpy.types.Operator.html#bpy.types.Operator.Operator.report
-                self.report({'INFO'}, f"Principal components coordinate are {principal_components}")
+        # We can report messages to the user, doc at:
+        # https://docs.blender.org/api/current/bpy.types.Operator.html#bpy.types.Operator.Operator.report
+        self.report({'INFO'}, f"Principal components coordinate are {principal_components}")
 
-                if principal_components:
+        if principal_components:
 
-                    # création de l'armature
-                    utils.mode_set(mode='OBJECT')
-                    bpy.ops.object.armature_add(location=(0, 0, 0))
-                    armature = bpy.context.active_object
+            # création de l'armature
+            utils.mode_set(mode='OBJECT')
+            bpy.ops.object.armature_add(location=(0, 0, 0))
+            armature = bpy.context.active_object
 
-                    utils.mode_set(mode='EDIT')
+            utils.mode_set(mode='EDIT')
 
-                    # On unpack les valeurs
-                    head, tail = principal_components['BODY']
+            # On unpack les valeurs
+            head, tail = principal_components['BODY']
 
-                    bone_body = bpy.context.active_bone
-                    # On lui assigne ses postions correspondante
-                    bone_body.head = head
-                    bone_body.tail = tail
+            bone_body = bpy.context.active_bone
+            # On lui assigne ses postions correspondante
+            bone_body.head = head
+            bone_body.tail = tail
 
-                    for key, points in principal_components.items():
-                        if key == 'BODY': continue
+            for key, points in principal_components.items():
+                if key == 'BODY': continue
 
-                        # On unpack les valeurs
-                        head, tail = points
+                # On unpack les valeurs
+                head, tail = points
 
-                        # On crée l'armature
-                        bone = armature.data.edit_bones.new(name=f'Bone{key}')
-                        # On lui assigne ses postions correspondante
-                        
-                        if 'LEG' in key:
-                            bone.head = tail
-                            bone.tail = head
+                # On crée l'armature
+                bone = armature.data.edit_bones.new(name=f'Bone{key}')
+                # On lui assigne ses postions correspondante
+                
+                if 'LEG' in key:
+                    bone.head = tail
+                    bone.tail = head
 
-                            bone_racc = armature.data.edit_bones.new(name=f'Bone{key}_Raccordement')
-                            bone_racc.head = bone_body.head
-                            bone_racc.tail = bone.head
-                        
-                        if key == 'HEAD':
-                            bone.head = tail 
-                            bone.tail = head
+                    bone_racc = armature.data.edit_bones.new(name=f'Bone{key}_Raccordement')
+                    bone_racc.head = bone_body.head
+                    bone_racc.tail = bone.head
+                
+                if key == 'HEAD':
+                    bone.head = tail 
+                    bone.tail = head
 
-                            bone_racc = armature.data.edit_bones.new(name=f'Bone{key}_Raccordement')
-                            bone_racc.head = bone_body.tail
-                            bone_racc.tail = bone.head
+                    bone_racc = armature.data.edit_bones.new(name=f'Bone{key}_Raccordement')
+                    bone_racc.head = bone_body.tail
+                    bone_racc.tail = bone.head
 
-                        if 'ARM' in key:
-                            bone.head = head
-                            bone.tail = tail
+                if 'ARM' in key:
+                    bone.head = head
+                    bone.tail = tail
 
-                            bone_racc = armature.data.edit_bones.new(name=f'Bone{key}_Raccordement')
-                            bone_racc.head = bone_body.tail
-                            bone_racc.tail = bone.head
-                        
-                        bone.use_relative_parent = True
-                        bone.parent = bone_racc
+                    bone_racc = armature.data.edit_bones.new(name=f'Bone{key}_Raccordement')
+                    bone_racc.head = bone_body.tail
+                    bone_racc.tail = bone.head
+                
+                bone.use_relative_parent = True
+                bone.parent = bone_racc
 
-                        bone_racc.use_relative_parent = True
-                        bone_racc.parent = bone_body
+                bone_racc.use_relative_parent = True
+                bone_racc.parent = bone_body
 
-                    utils.mode_set(mode='OBJECT')
-                    cube = bpy.data.objects[context.scene.active_mesh]
-                    cube.select_set(True)
-                    armature.select_set(True)
-                    bpy.ops.object.parent_set(type='ARMATURE_AUTO')
+            utils.mode_set(mode='OBJECT')
+            cube = bpy.data.objects[context.scene.active_mesh]
+            cube.select_set(True)
+            armature.select_set(True)
+            bpy.ops.object.parent_set(type='ARMATURE_AUTO')
 
-                    # debug
-                    # utils.mode_set('OBJECT')
-                    # for key, points in principal_components.items():
-                    #     for point in points:
-                    #         bpy.ops.mesh.primitive_cube_add(size=0.25, location=point)
-
-        client.RpcHandler.rpc_async_req(utils.JSONLoader.to_serializable(context.scene), callback)
+            # debug
+            # utils.mode_set('OBJECT')
+            # for key, points in principal_components.items():
+            #     for point in points:
+            #         bpy.ops.mesh.primitive_cube_add(size=0.25, location=point)
 
         return {'FINISHED'}
 

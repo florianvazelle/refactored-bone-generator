@@ -2,6 +2,10 @@ import os
 import bpy
 import json
 
+from typing import List
+
+from .proto.bone_generator import Vertex, Member
+
 # -------------------------------------------------------------------
 
 
@@ -120,6 +124,24 @@ def color_to_vertices(context, vertices, color):
 
 # -------------------------------------------------------------------
 
+
+class ProtoSerializer:
+
+    @classmethod
+    def blender_to_proto(cls, scene) -> List[Member]:
+        data = scene.selected_members
+        out_data: List[Member] = []
+
+        for key, value in data.items():
+            points_cloud: List[Vertex] = []
+
+            for point in value.points_cloud.values():
+                x, y, z = point.get()
+                points_cloud.append(Vertex(x, y, z))
+
+            out_data.append(Member(key, points_cloud))
+
+        return out_data
 
 class JSONLoader:
 
