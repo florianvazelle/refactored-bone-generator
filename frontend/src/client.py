@@ -7,7 +7,7 @@ from .proto.bone_generator import BoneGeneratorStub, Member
 
 class RpcHandler:
     @classmethod
-    async def rpc_async_req(cls, in_members: List[Member]) -> List[Members]:
+    async def rpc_async_req(cls, in_members: List[Member]) -> List[Member]:
         async with Channel('[::1]', 50052) as channel:
             print("in_members", in_members)
             service = BoneGeneratorStub(channel)

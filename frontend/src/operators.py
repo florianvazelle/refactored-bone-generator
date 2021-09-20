@@ -248,7 +248,7 @@ class ComputeBonesGeneration(BaseOperator):
             )
         )
         
-        principal_components = {x.name: (x.vertices[0], x.vertices[1]) for x in members}
+        principal_components = {x.name: ((x.vertices[0].x, x.vertices[0].y, x.vertices[0].z), (x.vertices[1].x, x.vertices[1].y, x.vertices[1].z)) for x in members}
 
         # We can report messages to the user, doc at:
         # https://docs.blender.org/api/current/bpy.types.Operator.html#bpy.types.Operator.Operator.report
