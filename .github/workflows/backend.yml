@@ -2,6 +2,10 @@ name: backend
 
 on: [push]
 
+defaults:
+  run:
+    working-directory: backend/
+
 jobs:
   check:
     name: Check
